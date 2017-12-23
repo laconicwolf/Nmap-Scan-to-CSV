@@ -14,8 +14,10 @@ Converts Nmap XML output to csv file, and other useful functions
 
 ### Display least common open ports
 > Displays the 10 least common open ports
+
 `python3 nmap_xml_parser.py -f nmap_scan.xml -lc 10`
 
 ### Display most common open ports
 > Displays the 10 most common open ports
+
 `python3 nmap_xml_parser.py -f nmap_scan.xml -mc 10`
