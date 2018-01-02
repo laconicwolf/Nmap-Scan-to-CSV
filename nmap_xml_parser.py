@@ -140,6 +140,32 @@ def list_ip_addresses(data):
         print(ip)
 
 
+def print_web_ports(data):
+	""" Examines the port information and prints out the IP and port 
+	info in URL format (https://ipaddr:port/)
+	"""
+	# http and https port numbers came from experience as well as
+	# searching for http on th following website:
+	# https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+	http_port_list = ['80', '81', '591', '593', '2080', '2480' '3080', 
+					  '4080', '4567', '5080', '5104', '5800' '6080',
+					  '7001', '7080', '8000', '8008', '8042', '8080',
+					  '8081', '8082', '8088', '8222', '8280', '8281',
+					  '8530', '8887', '9000', '9080', '16080']					  
+	https_port_list = ['832', '981', '1311', '7002', '8333', '8531',
+					   '8888']
+	
+	for item in data:
+		ip = item[0]
+		port = item[4]
+		if port.endswith('43') and port != "143" or port in https_port_list:
+			print("https://{}:{}".format(ip, port))
+		elif port in http_port_list:
+			print("http://{}:{}".format(ip, port))
+		else:
+			continue	
+	
+		
 def least_common_ports(data, n):
     """ Examines the port index from data and returns the least common ports
     """
@@ -184,6 +210,8 @@ def main():
             list_ip_addresses(data)
         if args.print_all:
             print_data(data)
+        if args.print_web_ports:
+            print_web_ports(data)
         if args.least_common_ports:
             print("\n{} LEAST COMMON PORTS".format(filename.upper()))
             least_common_ports(data, args.least_common_ports)
@@ -195,6 +223,7 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--print_all", help="display scan information to the screen", action="store_true")
+    parser.add_argument("-pw", "--print_web_ports", help="display IP addresses/ports in URL format (http://ipaddr:port)", action="store_true")
     parser.add_argument("-ip", "--ip_addresses", help="display a list of ip addresses", action="store_true")
     parser.add_argument("-csv", "--csv", nargs='?', const='scan.csv', help="specify the name of a csv file to write to. If the file already exists it will be appended")
     parser.add_argument("-f", "--filename", nargs='*', help="specify a file containing the output of an nmap scan in xml format.")
@@ -207,7 +236,7 @@ if __name__ == '__main__':
         print("\n [-]  Please specify an input file to parse. Use -f <nmap_scan.xml> to specify the file\n")
         exit()
 
-    if not args.ip_addresses and not args.csv and not args.print_all and not args.least_common_ports and not args.most_common_ports:
+    if not args.ip_addresses and not args.csv and not args.print_all and not args.print_web_ports and not args.least_common_ports and not args.most_common_ports:
         parser.print_help()
         print("\n [-]  Please choose an output option. Use -csv, -ip, or -p\n")
         exit()
