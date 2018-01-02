@@ -12,6 +12,9 @@ Converts Nmap XML output to csv file, and other useful functions
 ### Display only IP addresses
 `python3 nmap_xml_parser.py -f nmap_scan.xml -ip`
 
+### Display IP addresses/ports in URL friendly format (http://ipaddr:port)
+`python3 nmap_xml_parser.py -f nmap_scan.xml -pw`
+
 ### Display least common open ports
 > Displays the 10 least common open ports
 
