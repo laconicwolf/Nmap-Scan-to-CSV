@@ -8,7 +8,7 @@ from time import sleep
 
 
 if not version.startswith('3'):
-    print('\nThis script is inteded to be run with Python3. If using another version and encounter an error, try using Python3\n')
+    print('\nThis script is intended to be run with Python3. If using another version and encounter an error, try using Python3\n')
     sleep(3)
 
 
