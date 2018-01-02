@@ -38,6 +38,7 @@ def get_host_data(root):
     host_data = []
     hosts = root.findall('host')
     for host in hosts:
+        addr_info = []
         if not host.findall('status')[0].attrib['state'] == 'up':
             continue
 
@@ -55,40 +56,45 @@ def get_host_data(root):
         except IndexError:
             os_name = ''
         
-        port_element = host.findall('ports')
-        ports = port_element[0].findall('port')
+        try:
+            port_element = host.findall('ports')
+            ports = port_element[0].findall('port')
         
-        for port in ports:
-            port_data = []
-            if not port.findall('state')[0].attrib['state'] == 'open':
-                continue
+            for port in ports:
+                port_data = []
+                if not port.findall('state')[0].attrib['state'] == 'open':
+                    continue
 
-            proto = port.attrib['protocol']
-            port_id = port.attrib['portid']
-            service = port.findall('service')[0].attrib['name']
+                proto = port.attrib['protocol']
+                port_id = port.attrib['portid']
+                service = port.findall('service')[0].attrib['name']
 
-            try:
-                product = port.findall('service')[0].attrib['product']
-            except (IndexError, KeyError):
-                product = ''
+                try:
+                    product = port.findall('service')[0].attrib['product']
+                except (IndexError, KeyError):
+                    product = ''
                                
-            try:
-                servicefp = port.findall('service')[0].attrib['servicefp']
-            except (IndexError, KeyError):
-                servicefp = ''
+                try:
+                    servicefp = port.findall('service')[0].attrib['servicefp']
+                except (IndexError, KeyError):
+                    servicefp = ''
 
-            try:
-                script_id = port.findall('script')[0].attrib['id']
-            except (IndexError, KeyError):
-                script_id = ''
+                try:
+                    script_id = port.findall('script')[0].attrib['id']
+                except (IndexError, KeyError):
+                    script_id = ''
 
-            try:
-                script_output = port.findall('script')[0].attrib['output']
-            except (IndexError, KeyError):
-                script_output = ''
+                try:
+                    script_output = port.findall('script')[0].attrib['output']
+                except (IndexError, KeyError):
+                    script_output = ''
 
-            port_data.extend((ip_address, host_name, os_name, proto, port_id, service, product, servicefp, script_id, script_output))
-            host_data.append(port_data)
+                port_data.extend((ip_address, host_name, os_name, proto, port_id, service, product, servicefp, script_id, script_output))
+                host_data.append(port_data)
+
+        except IndexError:
+            addr_info.extend((ip_address, host_name))
+            host_data.append(addr_info)
     
     return host_data
 
@@ -142,7 +148,7 @@ def list_ip_addresses(data):
 
 def print_web_ports(data):
     """ Examines the port information and prints out the IP and port 
-	info in URL format (https://ipaddr:port/)
+    info in URL format (https://ipaddr:port/)
     """
     # http and https port numbers came from experience as well as
     # searching for http on th following website:
@@ -151,10 +157,10 @@ def print_web_ports(data):
                       '4080', '4567', '5080', '5104', '5800' '6080',
                       '7001', '7080', '8000', '8008', '8042', '8080',
                       '8081', '8082', '8088', '8222', '8280', '8281',
-                      '8530', '8887', '9000', '9080', '16080']					  
+                      '8530', '8887', '9000', '9080', '16080']                    
     https_port_list = ['832', '981', '1311', '7002', '8333', '8531',
                        '8888']
-	
+    
     for item in data:
         ip = item[0]
         port = item[4]
@@ -163,9 +169,9 @@ def print_web_ports(data):
         elif port in http_port_list:
             print("http://{}:{}".format(ip, port))
         else:
-            continue	
-	
-		
+            continue    
+    
+        
 def least_common_ports(data, n):
     """ Examines the port index from data and returns the least common ports
     """
