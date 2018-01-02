@@ -141,29 +141,29 @@ def list_ip_addresses(data):
 
 
 def print_web_ports(data):
-	""" Examines the port information and prints out the IP and port 
+    """ Examines the port information and prints out the IP and port 
 	info in URL format (https://ipaddr:port/)
-	"""
-	# http and https port numbers came from experience as well as
-	# searching for http on th following website:
-	# https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
-	http_port_list = ['80', '81', '591', '593', '2080', '2480' '3080', 
-					  '4080', '4567', '5080', '5104', '5800' '6080',
-					  '7001', '7080', '8000', '8008', '8042', '8080',
-					  '8081', '8082', '8088', '8222', '8280', '8281',
-					  '8530', '8887', '9000', '9080', '16080']					  
-	https_port_list = ['832', '981', '1311', '7002', '8333', '8531',
-					   '8888']
+    """
+    # http and https port numbers came from experience as well as
+    # searching for http on th following website:
+    # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+    http_port_list = ['80', '81', '591', '593', '2080', '2480' '3080', 
+                      '4080', '4567', '5080', '5104', '5800' '6080',
+                      '7001', '7080', '8000', '8008', '8042', '8080',
+                      '8081', '8082', '8088', '8222', '8280', '8281',
+                      '8530', '8887', '9000', '9080', '16080']					  
+    https_port_list = ['832', '981', '1311', '7002', '8333', '8531',
+                       '8888']
 	
-	for item in data:
-		ip = item[0]
-		port = item[4]
-		if port.endswith('43') and port != "143" or port in https_port_list:
-			print("https://{}:{}".format(ip, port))
-		elif port in http_port_list:
-			print("http://{}:{}".format(ip, port))
-		else:
-			continue	
+    for item in data:
+        ip = item[0]
+        port = item[4]
+        if port.endswith('43') and port != "143" or port in https_port_list:
+            print("https://{}:{}".format(ip, port))
+        elif port in http_port_list:
+            print("http://{}:{}".format(ip, port))
+        else:
+            continue	
 	
 		
 def least_common_ports(data, n):
