@@ -25,7 +25,11 @@ __description__ = '''Parses the xml output from an nmap scan. The user
 def get_xml_root(xml):
     """ Parses an xml file and returns the tree
     """
-    tree = etree.parse(xml)
+    try:
+        tree = etree.parse(xml)
+    except:
+        print("A an error occurred. The XML may not be well formed.")
+        exit()
     root = tree.getroot()
 
     return root
@@ -157,7 +161,7 @@ def print_web_ports(data):
                       '4080', '4567', '5080', '5104', '5800' '6080',
                       '7001', '7080', '8000', '8008', '8042', '8080',
                       '8081', '8082', '8088', '8222', '8280', '8281',
-                      '8530', '8887', '9000', '9080', '16080']                    
+                      '8530', '8887', '9000', '9080', '9090', '16080']                    
     https_port_list = ['832', '981', '1311', '7002', '8333', '8531',
                        '8888']
     
@@ -175,7 +179,6 @@ def print_web_ports(data):
 def least_common_ports(data, n):
     """ Examines the port index from data and returns the least common ports
     """
-    n = int(n)
     c = Counter()
     for item in data:
         port = item[4]
@@ -189,7 +192,6 @@ def least_common_ports(data, n):
 def most_common_ports(data, n):
     """ Examines the port index from data and returns the most common ports
     """
-    n = int(n)
     c = Counter()
     for item in data:
         port = item[4]
@@ -233,8 +235,8 @@ if __name__ == '__main__':
     parser.add_argument("-ip", "--ip_addresses", help="display a list of ip addresses", action="store_true")
     parser.add_argument("-csv", "--csv", nargs='?', const='scan.csv', help="specify the name of a csv file to write to. If the file already exists it will be appended")
     parser.add_argument("-f", "--filename", nargs='*', help="specify a file containing the output of an nmap scan in xml format.")
-    parser.add_argument("-lc", "--least_common_ports", help="displays the least common open ports.")
-    parser.add_argument("-mc", "--most_common_ports", help="displays the most common open ports.")
+    parser.add_argument("-lc", "--least_common_ports", type=int, help="displays the least common open ports.")
+    parser.add_argument("-mc", "--most_common_ports", type=int, help="displays the most common open ports.")
     args = parser.parse_args()
 
     if not args.filename:
@@ -246,6 +248,6 @@ if __name__ == '__main__':
         parser.print_help()
         print("\n [-]  Please choose an output option. Use -csv, -ip, or -p\n")
         exit()
-
+        
     csv_name = args.csv
     main()
