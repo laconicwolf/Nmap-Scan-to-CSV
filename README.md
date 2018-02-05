@@ -26,3 +26,8 @@ Converts Nmap XML output to csv file, and other useful functions
 > Displays the 10 most common open ports
 
 `python3 nmap_xml_parser.py -f nmap_scan.xml -mc 10`
+
+### Display only IP addresses with a specified open port
+> Displays only IP addresses where port 23 is open
+
+`python3 nmap_xml_parser.py -f nmap_scan.xml -fp 23`
