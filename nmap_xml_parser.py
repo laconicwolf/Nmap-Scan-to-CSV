@@ -177,7 +177,7 @@ def print_web_ports(data):
     
         
 def least_common_ports(data, n):
-    """ Examines the port index from data and returns the least common ports
+    """ Examines the port index from data and prints the least common ports
     """
     c = Counter()
     for item in data:
@@ -190,7 +190,7 @@ def least_common_ports(data, n):
 
 
 def most_common_ports(data, n):
-    """ Examines the port index from data and returns the most common ports
+    """ Examines the port index from data and prints the most common ports
     """
     c = Counter()
     for item in data:
@@ -200,6 +200,16 @@ def most_common_ports(data, n):
     print("{0:8} {1:15}\n".format('PORT', 'OCCURENCES'))
     for p in c.most_common(n):
         print("{0:5} {1:8}".format(p[0], p[1]))
+
+
+def print_filtered_port(data, filtered_port):
+    """ Examines the port index from data and see if it matches the 
+    filtered_port. If it matches, print the IP address
+    """
+    for item in data:
+        port = item[4]
+        if port == filtered_port:
+            print(item[0])
 
 
 def print_data(data):
@@ -218,6 +228,8 @@ def main():
             list_ip_addresses(data)
         if args.print_all:
             print_data(data)
+        if args.filter_by_port:
+            print_filtered_port(data, args.filter_by_port)
         if args.print_web_ports:
             print_web_ports(data)
         if args.least_common_ports:
@@ -237,6 +249,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--filename", nargs='*', help="specify a file containing the output of an nmap scan in xml format.")
     parser.add_argument("-lc", "--least_common_ports", type=int, help="displays the least common open ports.")
     parser.add_argument("-mc", "--most_common_ports", type=int, help="displays the most common open ports.")
+    parser.add_argument("-fp", "--filter_by_port", help="displays the IP addresses that are listenting on a specified port")
     args = parser.parse_args()
 
     if not args.filename:
@@ -244,7 +257,8 @@ if __name__ == '__main__':
         print("\n [-]  Please specify an input file to parse. Use -f <nmap_scan.xml> to specify the file\n")
         exit()
 
-    if not args.ip_addresses and not args.csv and not args.print_all and not args.print_web_ports and not args.least_common_ports and not args.most_common_ports:
+    if not args.ip_addresses and not args.csv and not args.print_all and not args.print_web_ports \
+    and not args.least_common_ports and not args.most_common_ports and not args.filter_by_port:
         parser.print_help()
         print("\n [-]  Please choose an output option. Use -csv, -ip, or -p\n")
         exit()
