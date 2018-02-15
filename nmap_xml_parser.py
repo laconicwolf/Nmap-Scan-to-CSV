@@ -124,9 +124,11 @@ def parse_to_csv(data):
     else:
         try:
             csv_file = open(csv_name, 'a', newline='')
-        except PermissionError:
+        except PermissionError as e:
             print("\n [-]  Permission denied to open the file {}. Check if the file is open and try again.\n".format(csv_name))
             print("Print data to the terminal:\n")
+            if args.debug:
+                print(e)
             for item in data:
                 print(' '.join(item))
             exit()
@@ -181,8 +183,13 @@ def least_common_ports(data, n):
     """
     c = Counter()
     for item in data:
-        port = item[4]
-        c.update([port])
+        try:
+            port = item[4]
+            c.update([port])
+        except IndexError as e:
+            if args.debug:
+                print(e)
+            continue
 
     print("{0:8} {1:15}\n".format('PORT', 'OCCURENCES'))
     for p in c.most_common()[:-n-1:-1]:
@@ -194,8 +201,13 @@ def most_common_ports(data, n):
     """
     c = Counter()
     for item in data:
-        port = item[4]
-        c.update([port])
+        try:
+            port = item[4]
+            c.update([port])
+        except IndexError as e:
+            if args.debug:
+                print(e)
+            continue
 
     print("{0:8} {1:15}\n".format('PORT', 'OCCURENCES'))
     for p in c.most_common(n):
@@ -242,6 +254,7 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--debug", help="display error information", action="store_true")
     parser.add_argument("-p", "--print_all", help="display scan information to the screen", action="store_true")
     parser.add_argument("-pw", "--print_web_ports", help="display IP addresses/ports in URL format (http://ipaddr:port)", action="store_true")
     parser.add_argument("-ip", "--ip_addresses", help="display a list of ip addresses", action="store_true")
