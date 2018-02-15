@@ -219,7 +219,12 @@ def print_filtered_port(data, filtered_port):
     filtered_port. If it matches, print the IP address
     """
     for item in data:
-        port = item[4]
+        try:
+            port = item[4]
+        except IndexError as e:
+            if args.debug:
+                print(e)
+            continue
         if port == filtered_port:
             print(item[0])
 
