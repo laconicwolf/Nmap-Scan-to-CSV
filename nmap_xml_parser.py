@@ -54,6 +54,11 @@ def get_host_data(root):
         except IndexError:
             host_name = ''
 
+        if args.ip_addresses:
+            addr_info.extend((ip_address, host_name))
+            host_data.append(addr_info)
+            continue
+            
         try:
             os_element = host.findall('os')
             os_name = os_element[0].findall('osmatch')[0].attrib['name']
@@ -147,9 +152,13 @@ def list_ip_addresses(data):
     ip_list = []
     for item in data:
         ip_list.append(item[0])
+
     sorted_set = sorted(set(ip_list))
+    addr_list = []
     for ip in sorted_set:
-        print(ip)
+        addr_list.append(ip)
+
+    return addr_list
 
 
 def print_web_ports(data):
@@ -242,7 +251,9 @@ def main():
         if args.csv:
             parse_to_csv(data)
         if args.ip_addresses:
-            list_ip_addresses(data)
+            addrs = list_ip_addresses(data)
+            for addr in addrs:
+                print(addr)
         if args.print_all:
             print_data(data)
         if args.filter_by_port:
