@@ -242,7 +242,7 @@ def main():
             contents = fh.read()
             if '<!entity' in contents.lower():
                 print("[-] Error! This program does not permit XML entities. Exiting!")
-                exit()
+                continue
         data = parse_xml(filename)
         if not data:
             print("[*] Zero hosts identitified as 'Up'. Exiting.")
