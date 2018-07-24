@@ -17,13 +17,7 @@ import os
 import csv
 import argparse
 from collections import Counter
-from sys import version
 from time import sleep
-
-
-if not version.startswith('3'):
-    print('\nThis script is intended to be run with Python3. If using another version and encounter an error, try using Python3\n')
-    sleep(3)
 
 
 def get_xml_root(xml):
@@ -31,7 +25,7 @@ def get_xml_root(xml):
     try:
         tree = etree.parse(xml)
     except Exception as error:
-        print("A an error occurred. The XML may not be well formed. Please review the error and try again: {}".format(error))
+        print("[-] A an error occurred. The XML may not be well formed. Please review the error and try again: {}".format(error))
         exit()
     return tree.getroot()
 
@@ -140,7 +134,7 @@ def parse_to_csv(data):
                 print(' '.join(item))
             exit()
         csv_writer = csv.writer(csv_file)
-        print('\n [+]  {} exists. Appending to file!\n'.format(csv_name))
+        print('\n[+] {} exists. Appending to file!\n'.format(csv_name))
     for item in data:
         csv_writer.writerow(item)
     csv_file.close()        
@@ -234,6 +228,7 @@ def print_data(data):
 
 
 def main():
+    """Main function of the script."""
     for filename in args.filename:
 
         # Checks the file path
@@ -249,6 +244,9 @@ def main():
                 print("[-] Error! This program does not permit XML entities. Exiting!")
                 exit()
         data = parse_xml(filename)
+        if not data:
+            print("[*] Zero hosts identitified as 'Up'. Exiting.")
+            exit()
         if args.csv:
             parse_to_csv(data)
         if args.ip_addresses:
