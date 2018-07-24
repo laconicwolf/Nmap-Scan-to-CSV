@@ -144,7 +144,7 @@ def list_ip_addresses(data):
     """Parses the input data to display only the IP address information"""
     ip_list = [item[0] for item in data]
     sorted_set = sorted(set(ip_list))
-    addr_list = [ip for up in sorted_set]
+    addr_list = [ip for ip in sorted_set]
     return addr_list
 
 
