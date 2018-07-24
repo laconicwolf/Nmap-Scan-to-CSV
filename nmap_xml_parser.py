@@ -237,12 +237,14 @@ def main():
             print("\n[-] The file {} cannot be found or you do not have permission to open the file.".format(filename))
             continue
 
-        # Read the file and check for entities
-        with open(filename) as fh:
-            contents = fh.read()
-            if '<!entity' in contents.lower():
-                print("[-] Error! This program does not permit XML entities. Exiting!")
-                continue
+        if not args.skip_entity_check:
+            # Read the file and check for entities
+            with open(filename) as fh:
+                contents = fh.read()
+                if '<!entity' in contents.lower():
+                    print("[-] Error! This program does not permit XML entities. Ignoring {}".format(filename))
+                    print("[*] Use -s (--skip_entity_check) to ignore this check for XML entities.")
+                    continue
         data = parse_xml(filename)
         if not data:
             print("[*] Zero hosts identitified as 'Up'. Exiting.")
@@ -271,6 +273,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug",
                         help="Display error information",
+                        action="store_true")
+    parser.add_argument("-s", "--skip_entity_check",
+                        help="Skip the check for XML entities",
                         action="store_true")
     parser.add_argument("-p", "--print_all",
                         help="Display scan information to the screen", 
