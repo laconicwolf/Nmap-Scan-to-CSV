@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+#!/usr/bin/env python
 
 __author__ = 'Jake Miller (@LaconicWolf)'
 __date__ = '20171220'
@@ -8,9 +7,8 @@ __description__ = """Parses the XML output from an nmap scan. The user
                   can specify whether the data should be printed,
                   displayed as a list of IP addresses, or output to
                   a csv file. Will append to a csv if the filename
-                  already exists
+                  already exists.
                   """
-
 
 import xml.etree.ElementTree as etree
 import os
@@ -18,17 +16,6 @@ import csv
 import argparse
 from collections import Counter
 from time import sleep
-
-
-def get_xml_root(xml):
-    """Parses an xml file and returns the tree."""
-    try:
-        tree = etree.parse(xml)
-    except Exception as error:
-        print("[-] A an error occurred. The XML may not be well formed. Please review the error and try again: {}".format(error))
-        exit()
-    return tree.getroot()
-
 
 def get_host_data(root):
     """Traverses the xml tree and build lists of scan information
@@ -71,9 +58,14 @@ def get_host_data(root):
             for port in ports:
                 port_data = []
 
-                # Ignore ports that are not 'open'
-                if not port.findall('state')[0].attrib['state'] == 'open':
-                    continue
+                if args.udp_open:
+                    # Display both open ports and open}filtered ports
+                    if not 'open' in port.findall('state')[0].attrib['state']:
+                        continue
+                else:
+                    # Ignore ports that are not 'open'
+                    if not port.findall('state')[0].attrib['state'] == 'open':
+                        continue
                 
                 proto = port.attrib['protocol']
                 port_id = port.attrib['portid']
@@ -96,7 +88,9 @@ def get_host_data(root):
                     script_output = ''
 
                 # Create a list of the port data
-                port_data.extend((ip_address, host_name, os_name, proto, port_id, service, product, servicefp, script_id, script_output))
+                port_data.extend((ip_address, host_name, os_name,
+                                  proto, port_id, service, product, 
+                                  servicefp, script_id, script_output))
                 
                 # Add the port data to the host data
                 host_data.append(port_data)
@@ -107,26 +101,40 @@ def get_host_data(root):
             host_data.append(addr_info)
     return host_data
 
-
 def parse_xml(filename):
-    """Calls functions to read the xml and extract elements and values."""
-    root = get_xml_root(filename)
-    return get_host_data(root)
-
+    """Given an XML filename, reads and parses the XML file and passes the 
+    the root node of type xml.etree.ElementTree.Element to the get_host_data
+    function, which will futher parse the data and return a list of lists
+    containing the scan data for a host or hosts."""
+    try:
+        tree = etree.parse(filename)
+    except Exception as error:
+        print("[-] A an error occurred. The XML may not be well formed. "
+              "Please review the error and try again: {}".format(error))
+        exit()
+    root = tree.getroot()
+    scan_data = get_host_data(root)
+    return scan_data
 
 def parse_to_csv(data):
-    """Accepts a list and adds the items to (or creates) a CSV file."""
+    """Given a list of data, adds the items to (or creates) a CSV file."""
     if not os.path.isfile(csv_name):
         csv_file = open(csv_name, 'w', newline='')
         csv_writer = csv.writer(csv_file)
-        top_row = ['IP', 'Host', 'OS', 'Proto', 'Port', 'Service', 'Product', 'Service FP', 'NSE Script ID', 'NSE Script Output', 'Notes']
+        top_row = [
+            'IP', 'Host', 'OS', 'Proto', 'Port',
+            'Service', 'Product', 'Service FP',
+            'NSE Script ID', 'NSE Script Output', 'Notes'
+        ]
         csv_writer.writerow(top_row)
-        print('\n[+] The file {} does not exist. New file created!\n'.format(csv_name))
+        print('\n[+] The file {} does not exist. New file created!\n'.format(
+                csv_name))
     else:
         try:
             csv_file = open(csv_name, 'a', newline='')
         except PermissionError as e:
-            print("\n[-] Permission denied to open the file {}. Check if the file is open and try again.\n".format(csv_name))
+            print("\n[-] Permission denied to open the file {}. "
+                  "Check if the file is open and try again.\n".format(csv_name))
             print("Print data to the terminal:\n")
             if args.debug:
                 print(e)
@@ -139,14 +147,12 @@ def parse_to_csv(data):
         csv_writer.writerow(item)
     csv_file.close()        
 
-
 def list_ip_addresses(data):
-    """Parses the input data to display only the IP address information"""
+    """Parses the input data to return only the IP address information"""
     ip_list = [item[0] for item in data]
     sorted_set = sorted(set(ip_list))
     addr_list = [ip for ip in sorted_set]
     return addr_list
-
 
 def print_web_ports(data):
     """Examines the port information and prints out the IP and port 
@@ -173,7 +179,6 @@ def print_web_ports(data):
         else:
             continue    
     
-        
 def least_common_ports(data, n):
     """Examines the port index from data and prints the least common ports."""
     c = Counter()
@@ -188,7 +193,6 @@ def least_common_ports(data, n):
     print("{0:8} {1:15}\n".format('PORT', 'OCCURENCES'))
     for p in c.most_common()[:-n-1:-1]:
         print("{0:5} {1:8}".format(p[0], p[1]))
-
 
 def most_common_ports(data, n):
     """Examines the port index from data and prints the most common ports."""
@@ -205,7 +209,6 @@ def most_common_ports(data, n):
     for p in c.most_common(n):
         print("{0:5} {1:8}".format(p[0], p[1]))
 
-
 def print_filtered_port(data, filtered_port):
     """Examines the port index from data and see if it matches the 
     filtered_port. If it matches, print the IP address.
@@ -220,12 +223,10 @@ def print_filtered_port(data, filtered_port):
         if port == filtered_port:
             print(item[0])
 
-
 def print_data(data):
     """Prints the data to the terminal."""
     for item in data:
         print(' '.join(item))
-
 
 def main():
     """Main function of the script."""
@@ -234,7 +235,8 @@ def main():
         # Checks the file path
         if not os.path.exists(filename):
             parser.print_help()
-            print("\n[-] The file {} cannot be found or you do not have permission to open the file.".format(filename))
+            print("\n[-] The file {} cannot be found or you do not have "
+                  "permission to open the file.".format(filename))
             continue
 
         if not args.skip_entity_check:
@@ -242,12 +244,16 @@ def main():
             with open(filename) as fh:
                 contents = fh.read()
                 if '<!entity' in contents.lower():
-                    print("[-] Error! This program does not permit XML entities. Ignoring {}".format(filename))
-                    print("[*] Use -s (--skip_entity_check) to ignore this check for XML entities.")
+                    print("[-] Error! This program does not permit XML "
+                          "entities. Ignoring {}".format(filename))
+                    print("[*] Use -s (--skip_entity_check) to ignore this "
+                          "check for XML entities.")
                     continue
         data = parse_xml(filename)
         if not data:
-            print("[*] Zero hosts identitified as 'Up'. Exiting.")
+            print("[*] Zero hosts identitified as 'Up' or with 'open' ports. "
+                  "Use the -u option to display ports that are 'open|filtered'. "
+                  "Exiting.")
             exit()
         if args.csv:
             parse_to_csv(data)
@@ -268,7 +274,6 @@ def main():
             print("\n{} MOST COMMON PORTS".format(filename.upper()))
             most_common_ports(data, args.most_common_ports)
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug",
@@ -281,17 +286,20 @@ if __name__ == '__main__':
                         help="Display scan information to the screen", 
                         action="store_true")
     parser.add_argument("-pw", "--print_web_ports",
-                        help="Display IP addresses/ports in URL format (http://ipaddr:port)",
+                        help="Display IP addresses/ports in URL format "
+                             "(http://ipaddr:port)",
                         action="store_true")
     parser.add_argument("-ip", "--ip_addresses",
                         help="Display a list of ip addresses",
                         action="store_true")
     parser.add_argument("-csv", "--csv",
                         nargs='?', const='scan.csv',
-                        help="Specify the name of a csv file to write to. If the file already exists it will be appended")
+                        help="Specify the name of a csv file to write to. "
+                             "If the file already exists it will be appended")
     parser.add_argument("-f", "--filename",
                         nargs='*',
-                        help="Specify a file containing the output of an nmap scan in xml format.")
+                        help="Specify a file containing the output of an nmap "
+                             "scan in xml format.")
     parser.add_argument("-lc","--least_common_ports",
                         type=int, 
                         help="Displays the least common open ports.")
@@ -299,15 +307,22 @@ if __name__ == '__main__':
                         type=int, 
                         help="Displays the most common open ports.")
     parser.add_argument("-fp", "--filter_by_port", 
-                        help="displays the IP addresses that are listenting on a specified port")
+                        help="Displays the IP addresses that are listenting on "
+                             "a specified port")
+    parser.add_argument("-u", "--udp_open", 
+                        help="Displays the UDP ports identified as "
+                             "open|filtered",
+                        action="store_true")
     args = parser.parse_args()
 
     if not args.filename:
         parser.print_help()
-        print("\n[-] Please specify an input file to parse. Use -f <nmap_scan.xml> to specify the file\n")
+        print("\n[-] Please specify an input file to parse. "
+              "Use -f <nmap_scan.xml> to specify the file\n")
         exit()
-    if not args.ip_addresses and not args.csv and not args.print_all and not args.print_web_ports \
-    and not args.least_common_ports and not args.most_common_ports and not args.filter_by_port:
+    if not args.ip_addresses and not args.csv and not args.print_all \
+                and not args.print_web_ports and not args.least_common_ports \
+                and not args.most_common_ports and not args.filter_by_port:
         parser.print_help()
         print("\n[-] Please choose an output option. Use -csv, -ip, or -p\n")
         exit()
