@@ -78,22 +78,36 @@ def get_host_data(root):
                     servicefp = port.findall('service')[0].attrib['servicefp']
                 except (IndexError, KeyError):
                     servicefp = ''
-                try:
-                    script_id = port.findall('script')[0].attrib['id']
-                except (IndexError, KeyError):
-                    script_id = ''
-                try:
-                    script_output = port.findall('script')[0].attrib['output']
-                except (IndexError, KeyError):
-                    script_output = ''
-
-                # Create a list of the port data
-                port_data.extend((ip_address, host_name, os_name,
-                                  proto, port_id, service, product, 
-                                  servicefp, script_id, script_output))
                 
-                # Add the port data to the host data
-                host_data.append(port_data)
+                hostscripts = host.findall('hostscript')
+                if hostscripts:
+                    for hostscript in hostscripts:
+                        # Extract information about scripts
+                        scripts_element = hostscript.findall('script')
+                        
+                        for script in scripts_element:
+                            script_id = script.attrib['id']
+                            script_output = script.attrib['output']
+                            
+                            port_data.extend((ip_address, host_name, os_name,
+                                              proto, port_id, service, product, 
+                                              servicefp, script_id, script_output))
+                            
+                            # Add the port data to the host data
+                            host_data.append(port_data)
+                            # Create a new line for each plugin
+                            port_data = []
+
+                else:
+                    # No script found
+                    script_id = ''
+                    script_output = ''
+                    port_data.extend((ip_address, host_name, os_name,
+                                      proto, port_id, service, product, 
+                                      servicefp, script_id, script_output))
+                            
+                    # Add the port data to the host data
+                    host_data.append(port_data)
 
         # If no port information, just create a list of host information
         except IndexError:
