@@ -349,7 +349,7 @@ if __name__ == '__main__':
                 and not args.print_web_ports and not args.least_common_ports \
                 and not args.most_common_ports and not args.filter_by_port and not args.excel:
         parser.print_help()
-        print("\n[-] Please choose an output option. Use -csv, -ip, or -p\n")
+        print("\n[-] Please choose an output option. Use -csv, -excel, -ip, or -p\n")
         exit()
     csv_name = args.csv
     main()
