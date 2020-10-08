@@ -14,8 +14,15 @@ import xml.etree.ElementTree as etree
 import os
 import csv
 import argparse
+import pandas as pd
 from collections import Counter
 from time import sleep
+
+top_row = [
+    'IP', 'Host', 'OS', 'Proto', 'Port',
+    'Service', 'Product', 'Service FP',
+    'NSE Script ID', 'NSE Script Output'
+]
 
 def get_host_data(root):
     """Traverses the xml tree and build lists of scan information
@@ -116,16 +123,29 @@ def parse_xml(filename):
     scan_data = get_host_data(root)
     return scan_data
 
+
+def save_to_excel(data):
+    col_index = 9
+    df = pd.DataFrame(data, columns=top_row)
+
+    writer = pd.ExcelWriter(args.excel, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+    workbook  = writer.book
+    worksheet = writer.sheets['Sheet1']
+    wrap_format = workbook.add_format({'text_wrap': True})
+
+    worksheet.set_column(col_index, col_index, 100, wrap_format)
+    writer.save()
+
+    print(f"Wrote report to {args.excel}")
+
+
 def parse_to_csv(data):
     """Given a list of data, adds the items to (or creates) a CSV file."""
     if not os.path.isfile(csv_name):
         csv_file = open(csv_name, 'w', newline='')
         csv_writer = csv.writer(csv_file)
-        top_row = [
-            'IP', 'Host', 'OS', 'Proto', 'Port',
-            'Service', 'Product', 'Service FP',
-            'NSE Script ID', 'NSE Script Output', 'Notes'
-        ]
         csv_writer.writerow(top_row)
         print('\n[+] The file {} does not exist. New file created!\n'.format(
                 csv_name))
@@ -257,6 +277,8 @@ def main():
             exit()
         if args.csv:
             parse_to_csv(data)
+        if args.excel:
+            save_to_excel(data)
         if args.ip_addresses:
             addrs = list_ip_addresses(data)
             for addr in addrs:
@@ -296,6 +318,9 @@ if __name__ == '__main__':
                         nargs='?', const='scan.csv',
                         help="Specify the name of a csv file to write to. "
                              "If the file already exists it will be appended")
+    parser.add_argument("-excel", "--excel",
+                        nargs='?', const='scan.xlsx',
+                        help="Specify the name of an xlsx file to write to.")
     parser.add_argument("-f", "--filename",
                         nargs='*',
                         help="Specify a file containing the output of an nmap "
@@ -322,9 +347,9 @@ if __name__ == '__main__':
         exit()
     if not args.ip_addresses and not args.csv and not args.print_all \
                 and not args.print_web_ports and not args.least_common_ports \
-                and not args.most_common_ports and not args.filter_by_port:
+                and not args.most_common_ports and not args.filter_by_port and not args.excel:
         parser.print_help()
-        print("\n[-] Please choose an output option. Use -csv, -ip, or -p\n")
+        print("\n[-] Please choose an output option. Use -csv, -excel, -ip, or -p\n")
         exit()
     csv_name = args.csv
     main()
