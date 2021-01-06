@@ -69,7 +69,10 @@ def get_host_data(root):
                 
                 proto = port.attrib['protocol']
                 port_id = port.attrib['portid']
-                service = port.findall('service')[0].attrib['name']
+                try:
+                    service = port.findall('service')[0].attrib['name']
+                except (IndexError, KeyError):
+                    service = 'unknown'
                 try:
                     product = port.findall('service')[0].attrib['product']
                 except (IndexError, KeyError):
